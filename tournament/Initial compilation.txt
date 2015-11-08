@@ -1,0 +1,22 @@
+/*Initial compilation....*/
+
+select table1.no_of_wins, table2.total_games 
+FROM (select players.name, players.player_id, count(win_ref) as no_of_wins from players left join games on players.player_id = games.win_ref group by players.player_id order by no_of_wins desc) as table1, (select players.player_id, count(*) as total_games from players join games on players.player_id = games.win_ref OR players.player_id = games.loose_ref group by players.player_id) as table2
+WHERE table1.players.player_id = table2.players.player_id;
+
+
+/*after some frustration.... Progressed to trying UNION and UNION ALL...*/
+
+SELECT name, player_id, no_of_wins FROM (select players.name, players.player_id, count(win_ref) as no_of_wins from players left join games on players.player_id = games.win_ref group by players.player_id) as table1
+UNION ALL
+SELECT name, player_id, total_games FROM (select players.player_id, count(*) as total_games from players join games on players.player_id = games.win_ref OR players.player_id = games.loose_ref group by players.player_id) as table2;
+
+
+/*After shouting, angry pacing and getting absolutely pissed off, I progressed towards joining my two separate queries, using the link between player_id...*/
+
+
+"select * from (select players.name, players.player_id, count(win_ref) as no_of_wins from players left join games on players.player_id = games.win_ref group by players.player_id) as table1 join (select players.player_id, count(*) as total_games from players join games on players.player_id = games.win_ref OR players.player_id = games.loose_ref group by players.player_id) as table2 on table1.player_id = table2.player_id;"
+
+/*It worked a treat, finally! The only problem is that the table lists player id twice... so narrow down the search to below and the query is complete!*/
+
+query = "select name, table1.player_id, no_of_wins, total_games from (select players.name, players.player_id, count(win_ref) as no_of_wins from players left join games on players.player_id = games.win_ref group by players.player_id) as table1 join (select players.player_id, count(*) as total_games from players join games on players.player_id = games.win_ref OR players.player_id = games.loose_ref group by players.player_id) as table2 on table1.player_id = table2.player_id order by no_of_wins desc;"
