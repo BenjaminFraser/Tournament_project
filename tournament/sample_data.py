@@ -20,15 +20,15 @@ player_list = [
 ]
 
 
-def registerPlayerSample(player_id, name):
+def registerPlayerSample(player_id, name, tourn_id=1):
     """Add a player to the tournament database.
     Args:
       name: the player's full name (need not be unique).
     """
     db = connect()
     db_cursor = db.cursor()
-    query = "INSERT INTO players (player_id, name) VALUES (%s, %s)"
-    db_cursor.execute(query, (player_id, name))
+    query = "INSERT INTO players (player_id, name, tournament_id) VALUES (%s, %s, %s)"
+    db_cursor.execute(query, (player_id, name, tourn_id))
     db.commit()
     db.close()
 

@@ -9,6 +9,9 @@ CREATE TABLE Tournament (
         id serial PRIMARY KEY, 
         name varchar(150) NOT NULL);
 
+-- Insert First tournament into Tournament table with id 1. 
+INSERT INTO Tournament (id, name) VALUES (1, 'First tournament');
+
 -- TOURNAMENT 1 TABLES AND VIEWS
 
 -- Create a players table with id (primary key) and name for tournament 1.
@@ -22,8 +25,7 @@ CREATE TABLE players (
 CREATE TABLE games (
         id serial PRIMARY KEY,
 	win_ref integer REFERENCES players (player_id),
-	loose_ref integer REFERENCES players (player_id),
-        UNIQUE (win_ref, loose_ref));
+	loose_ref integer REFERENCES players (player_id));
 
 -- Create a view that lists a player_id along with associated loss record.
 CREATE VIEW v_lost_games as

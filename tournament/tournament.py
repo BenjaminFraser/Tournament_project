@@ -36,10 +36,10 @@ def countPlayers(tourn_id=1):
 
     conn = connect()
     c = conn.cursor()
-    if tourn_id == 2:
+    if tourn_id != 1:
         c.execute("SELECT count(player_id) FROM players_2;")
     else:
-        c.execute("SELECT count(player_id) FROM players;")
+        c.execute("SELECT count(player_id) FROM players WHERE tournament_id = 1;")
     count_result = c.fetchone()
     return count_result[0]
     conn.commit()
@@ -51,11 +51,11 @@ def registerPlayer(name, tourn_id=1):
 
     conn = connect()
     c = conn.cursor()
-    if tourn_id == 2:
-        query = "INSERT INTO players_2 (name) VALUES (%s);"
+    if tourn_id != 1:
+        query = "INSERT INTO players_2 (name, tournament_id) VALUES (%s, %s);"
     else:
-        query = "INSERT INTO players (name) VALUES (%s);"
-    c.execute(query, (name,))
+        query = "INSERT INTO players (name, tournament_id) VALUES (%s, %s);"
+    c.execute(query, (name, tourn_id))
     conn.commit()
     conn.close()
 
