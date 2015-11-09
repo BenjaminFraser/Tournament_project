@@ -12,6 +12,9 @@ CREATE TABLE Tournament (
 -- Insert First tournament into Tournament table with id 1. 
 INSERT INTO Tournament (id, name) VALUES (1, 'First tournament');
 
+-- Insert Second tournament into Tournament table with id 2. 
+INSERT INTO Tournament (id, name) VALUES (2, 'Second tournament');
+
 -- TOURNAMENT 1 TABLES AND VIEWS
 
 -- Create a players table with id (primary key) and name for tournament 1.
@@ -25,19 +28,36 @@ CREATE TABLE players (
 CREATE TABLE games (
         id serial PRIMARY KEY,
 	win_ref integer REFERENCES players (player_id),
-	loose_ref integer REFERENCES players (player_id));
+	loose_ref integer REFERENCES players (player_id),
+        tournament_id integer REFERENCES Tournament (id));
+
+-- Create a view to list players in tournament 1 only, with name and id.
+CREATE VIEW players_tourn_1 as
+        select player_id, name from players WHERE tournament_id = 1; 
+
+-- Create a view to list players in tournament 2 only, with name and id.
+CREATE VIEW players_tourn_2 as
+        select player_id, name from players WHERE tournament_id = 2; 
+
+-- Create a view to list matches in tournament 1 only.
+CREATE VIEW games_tourn_1 as
+        select id, win_ref, loose_ref from games WHERE tournament_id = 1;
+
+-- Create a view to list matches in tournament 2 only.
+CREATE VIEW games_tourn_2 as
+        select id, win_ref, loose_ref from games WHERE tournament_id = 2;
 
 -- Create a view that lists a player_id along with associated loss record.
 CREATE VIEW v_lost_games as
-        select players.player_id, count(loose_ref) as lost_games from 
-        players left join games on players.player_id = games.loose_ref 
-        group by players.player_id;
+        select players_tourn_1.player_id, count(loose_ref) as lost_games from 
+        players_tourn_1 left join games_tourn_1 on players_tourn_1.player_id = games_tourn_2.loose_ref 
+        group by players_tourn_1.player_id;
 
 -- Create a view that displays a players id, name and win count to aid further views.
 CREATE VIEW v_won_games as
-        select players.name, players.player_id, count(win_ref) as wins 
-        from players left join games on players.player_id = games.win_ref 
-        group by players.player_id;
+        select players_tourn_1.name, players_tourn_1.player_id, count(win_ref) as wins 
+        from players_tourn_1 left join games_tourn_1 on players_tourn_1.player_id = games_tourn_1.win_ref 
+        group by players_tourn_1.player_id;
 
 -- A combined view showing id, name, wins and losses.
 CREATE VIEW v_combined_standings as

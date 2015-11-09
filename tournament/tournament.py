@@ -52,7 +52,7 @@ def registerPlayer(name, tourn_id=1):
     conn = connect()
     c = conn.cursor()
     if tourn_id != 1:
-        query = "INSERT INTO players_2 (name, tournament_id) VALUES (%s, %s);"
+        query = "INSERT INTO players (name, tournament_id) VALUES (%s, %s);"
     else:
         query = "INSERT INTO players (name, tournament_id) VALUES (%s, %s);"
     c.execute(query, (name, tourn_id))
@@ -74,8 +74,8 @@ def playerStandings(tourn_id=1):
     conn = connect()
     c = conn.cursor()
     # If tournament 2 chosen, choose tournament 2 player standings view.
-    if tourn_id == 2:
-        c.execute("SELECT * FROM player_standings_2;")
+    if tourn_id != 1:
+        c.execute("SELECT * FROM player_standings_%s;" % tourn_id)
     else:
         # Use the view player_standings as defined within tournament.sql
         c.execute("SELECT * FROM player_standings;")
@@ -96,12 +96,12 @@ def reportMatch(winner, loser, tourn_id=1):
     conn = connect()
     c = conn.cursor()
     # If tournament 2 chosen, select appropriate query. 
-    if tourn_id == 2:
+    if tourn_id != 1:
         # Query and execute code format to escape strings, avoiding SQL inj.
-        query = "INSERT INTO games_2 (win_ref, loose_ref) VALUES (%s, %s);"
+        query = "INSERT INTO games (win_ref, loose_ref, tournament_id) VALUES (%s, %s, %s);"
     else:
-        query = "INSERT INTO games (win_ref, loose_ref) VALUES (%s, %s);"
-    c.execute(query, (winner, loser))
+        query = "INSERT INTO games (win_ref, loose_ref, tournament_id) VALUES (%s, %s, %s);"
+    c.execute(query, (winner, loser, tourn_id))
     conn.commit()
     conn.close()
 
