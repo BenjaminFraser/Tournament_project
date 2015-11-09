@@ -16,7 +16,7 @@ def deleteMatches():
     conn = connect()
     c = conn.cursor()
     # Truncate both tournaments games tables only, preserving player records.
-    c.execute("TRUNCATE TABLE games, games_2;")
+    c.execute("TRUNCATE TABLE games;")
     conn.commit()
     conn.close()
 
@@ -26,7 +26,7 @@ def deletePlayers():
     conn = connect()
     c = conn.cursor()
     # Truncate both tournaments players and games tables from the database.
-    c.execute("TRUNCATE TABLE players, games, players_2, games_2")
+    c.execute("TRUNCATE TABLE players, games")
     conn.commit()
     conn.close()
 
@@ -37,7 +37,7 @@ def countPlayers(tourn_id=1):
     conn = connect()
     c = conn.cursor()
     if tourn_id != 1:
-        c.execute("SELECT count(player_id) FROM players_2;")
+        c.execute("SELECT count(player_id) FROM players WHERE tournament_id = 2;")
     else:
         c.execute("SELECT count(player_id) FROM players WHERE tournament_id = 1;")
     count_result = c.fetchone()

@@ -50,7 +50,7 @@ CREATE VIEW games_tourn_2 as
 -- Create a view that lists a player_id along with associated loss record.
 CREATE VIEW v_lost_games as
         select players_tourn_1.player_id, count(loose_ref) as lost_games from 
-        players_tourn_1 left join games_tourn_1 on players_tourn_1.player_id = games_tourn_2.loose_ref 
+        players_tourn_1 left join games_tourn_1 on players_tourn_1.player_id = games_tourn_1.loose_ref 
         group by players_tourn_1.player_id;
 
 -- Create a view that displays a players id, name and win count to aid further views.
@@ -60,7 +60,7 @@ CREATE VIEW v_won_games as
         group by players_tourn_1.player_id;
 
 -- A combined view showing id, name, wins and losses.
-CREATE VIEW v_combined_standings as
+/* CREATE VIEW v_combined_standings as
         select name, table1.player_id, wins, lost_games
         from (select players.name, players.player_id, count(win_ref) as wins
         from players left join games on players.player_id = games.win_ref
@@ -152,5 +152,5 @@ CREATE VIEW v_swiss_pairings_2 as
         b.player_id as "player_2_id", b.name as "player_2_name"
         from ranked_standings_2 a, ranked_standings_2 b 
         where a.rank+1 = b.rank and a.rank % 2 = 1;
-
+*/
 
