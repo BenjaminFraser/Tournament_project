@@ -35,17 +35,9 @@ CREATE TABLE games (
 CREATE VIEW players_tourn_1 as
         select player_id, name from players WHERE tournament_id = 1; 
 
--- Create a view to list players in tournament 2 only, with name and id.
-CREATE VIEW players_tourn_2 as
-        select player_id, name from players WHERE tournament_id = 2; 
-
 -- Create a view to list matches in tournament 1 only.
 CREATE VIEW games_tourn_1 as
         select id, win_ref, loose_ref from games WHERE tournament_id = 1;
-
--- Create a view to list matches in tournament 2 only.
-CREATE VIEW games_tourn_2 as
-        select id, win_ref, loose_ref from games WHERE tournament_id = 2;
 
 -- Create a view that lists a player_id along with associated loss record.
 CREATE VIEW v_lost_games as

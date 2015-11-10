@@ -2,13 +2,24 @@
 # 
 # tournament.py -- implementation of a Swiss-system tournament
 #
-
+from multi_tourn_views import *
 import psycopg2
 
 
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
     return psycopg2.connect("dbname=tournament")
+
+def createTournament(tourn_id, name):
+    """Inserts a new tournament id and name into the database. """
+    name = str(name)
+    conn = connect()
+    c = conn.cursor()
+    query = "INSERT INTO Tournament (id, name) VALUES (%s, %s);"
+    c.execute(query, (tourn_id, name))
+    conn.commit()
+    initialiseTournViews(tourn_id)
+    conn.close()
 
 
 def deleteMatches():
