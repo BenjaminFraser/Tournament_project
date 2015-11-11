@@ -74,9 +74,9 @@ def setup_players_and_matches():
     createRandomMatches(player_list, 100, tourn_id=1)
 
     for player in player_list_02:
-        registerPlayerSample(player[0], player[1], tourn_id=2)
+        registerPlayerSample(player[0], player[1], tourn_id=12)
 
-    createRandomMatches(player_list_02, 100, tourn_id=2)
+    createRandomMatches(player_list_02, 100, tourn_id=12)
 
 
 if __name__ == '__main__':

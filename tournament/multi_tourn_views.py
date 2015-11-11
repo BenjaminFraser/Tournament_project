@@ -2,7 +2,7 @@
 #
 # View string compiler for multiple tournaments for tournament.py
 
-def initialiseTournPlayersView(t_id):
+def initTournPlayersView(t_id):
 	""" Returns SQL query string applicable to tourn players view """
 	tourn_players = ('CREATE VIEW players_tourn_%s as '
     'select player_id, name from players WHERE tournament_id = %s;' % (2*(t_id,)))
@@ -71,12 +71,3 @@ def initTournSwissPairings(t_id):
         'from ranked_standings_%s a, ranked_standings_%s b '
         'where a.rank+1 = b.rank and a.rank %% 2 = 1;' % (3*(t_id,)))
 	return swiss_pairings
-
-print initialiseTournCombinedStand(4), '\n'
-print initialiseTournWonGames(5), '\n'
-print initialiseTournLostGames(6), '\n'
-print initialiseTournGamesView(7), '\n'
-print initialiseTournPlayersView(8), '\n'
-print initialiseTournPlayerStandings(9), '\n'
-print initTournRankedStandings(10), '\n'
-print initTournSwissPairings(1), '\n'
