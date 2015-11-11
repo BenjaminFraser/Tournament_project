@@ -9,24 +9,24 @@ def initTournPlayersView(t_id):
 	return tourn_players
 
 
-def initialiseTournGamesView(t_id):
+def initTournGamesView(t_id):
     """ Returns SQL query string applicable to tourn games view """
     tourn_games = ('CREATE VIEW games_tourn_%s as '
     'select id, win_ref, loose_ref from games WHERE tournament_id = %s;' % (2*(t_id,)))
     return tourn_games
 
 
-def initialiseTournLostGames(t_id):
+def initTournLostGames(t_id):
     """ Returns SQL query string applicable to tourn lost games view """
-    lost_games = ('CREATE VIEW v_lost_games_%s as '
+    lost_games = ('CREATE VIEW lost_games_%s as '
         'select players_tourn_%s.player_id, count(loose_ref) as lost_games from ' 
         'players_tourn_%s left join games_tourn_%s on players_tourn_%s.player_id = games_tourn_%s.loose_ref ' 
         'group by players_tourn_%s.player_id;' % (7*(t_id,)))
     return lost_games
 
-def initialiseTournWonGames(t_id):
+def initTournWonGames(t_id):
     """ Returns SQL query string applicable to tourn won games view """
-    won_games = ('CREATE VIEW v_won_games_%s as '
+    won_games = ('CREATE VIEW won_games_%s as '
         'select players_tourn_%s.name, players_tourn_%s.player_id, wins from players_tourn_%s '
         'left join (select players_tourn_%s.player_id, count(win_ref) as wins '
         'from players_tourn_%s left join games_tourn_%s ' 
@@ -36,22 +36,22 @@ def initialiseTournWonGames(t_id):
     return won_games
 
 
-def initialiseTournCombinedStand(t_id):
+def initTournCombinedStand(t_id):
     """ Returns SQL query string applicable to tourn combined standings view """
-    combined_standings = ('CREATE VIEW v_combined_standings_%s as '
+    combined_standings = ('CREATE VIEW combined_standings_%s as '
         'select name, table1.player_id, wins, lost_games '
-        'from v_won_games_%s as table1 '
-        'join v_lost_games_%s as table2 on table1.player_id = table2.player_id '
+        'from won_games_%s as table1 '
+        'join lost_games_%s as table2 on table1.player_id = table2.player_id '
         'order by wins desc;' % (3*(t_id,)))
     return combined_standings
 
-def initialiseTournPlayerStandings(t_id):
+def initTournPlayerStandings(t_id):
     """ Returns SQL query string applicable to tourn player standings view. """
     player_standings = ('CREATE VIEW player_standings_%s as '
-        'select v_won_games_%s.player_id, name, v_won_games_%s.wins, total_games from ' 
-        'v_won_games_%s join (select player_id, SUM(wins + lost_games) as total_games '
-        'from v_combined_standings_%s group by player_id) as totaltable '
-        'on v_won_games_%s.player_id = totaltable.player_id order by wins desc;' % (6*(t_id,)))
+        'select won_games_%s.player_id, name, won_games_%s.wins, total_games from ' 
+        'won_games_%s join (select player_id, SUM(wins + lost_games) as total_games '
+        'from combined_standings_%s group by player_id) as totaltable '
+        'on won_games_%s.player_id = totaltable.player_id order by wins desc;' % (6*(t_id,)))
     return player_standings
 
 
@@ -65,7 +65,7 @@ def initTournRankedStandings(t_id):
 
 def initTournSwissPairings(t_id):
 
-	swiss_pairings = ('CREATE VIEW v_swiss_pairings_%s as '
+	swiss_pairings = ('CREATE VIEW swiss_pairings_%s as '
         'select a.player_id as "player_1_id", a.name as "player_1_name", '
         'b.player_id as "player_2_id", b.name as "player_2_name" '
         'from ranked_standings_%s a, ranked_standings_%s b '

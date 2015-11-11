@@ -10,38 +10,43 @@ def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
     return psycopg2.connect("dbname=tournament")
 
+
 def createTournament(tourn_id, name):
-    """Inserts a new tournament id and name into the database. """
+    """Inserts a new tournament id and name into the database. 
+    
+    For the created tournament, associated views are created as follows:
+        players_tourn_x: listed players in tournament x
+        games_tourn_x: listed games taken place in tournament x
+        lost_games_x: player id and losses in tournament x
+        won_games_x: player id, name and wins in tournament x
+        combined_standings_x: combination of won and lost in tournament x
+        player_standings_x: id, name, wins and total in tournament x
+        ranked_standings_x: player_standings_x numbered by rank
+        swiss_pairings_x: pairings for next match in tournament x
+    """
     name = str(name)
     conn = connect()
     c = conn.cursor()
+    # Insert the new tournament into table Tournament.
     query = "INSERT INTO Tournament (id, name) VALUES (%s, %s);"
     c.execute(query, (tourn_id, name))
     conn.commit()
-    players = initTournPlayersView(tourn_id)
-    c.execute(players)
-    conn.commit()
-    games = initialiseTournGamesView(tourn_id)
-    c.execute(games)
-    conn.commit()
-    lost_games = initialiseTournLostGames(tourn_id)
-    c.execute(lost_games)
-    conn.commit()
-    won_games = initialiseTournWonGames(tourn_id)
-    c.execute(won_games)
-    conn.commit()
-    combined_standings = initialiseTournCombinedStand(tourn_id)
-    c.execute(combined_standings)
-    conn.commit()
-    player_standings = initialiseTournPlayerStandings(tourn_id)
-    c.execute(player_standings)
-    conn.commit()
-    ranked_standings = initTournRankedStandings(tourn_id)
-    c.execute(ranked_standings)
-    conn.commit()
-    swiss_pairings = initTournSwissPairings(tourn_id)
-    c.execute(swiss_pairings)
-    conn.commit()
+    # Store view functions from multi_tourn_views.py within a list.
+    function_list = [
+        initTournPlayersView, 
+        initTournGamesView, 
+        initTournLostGames, 
+        initTournWonGames, 
+        initTournCombinedStand, 
+        initTournPlayerStandings, 
+        initTournRankedStandings, 
+        initTournSwissPairings]
+
+    # Iterate through function_list and execute each tourn view.
+    for f in function_list:
+        query = f(tourn_id)
+        c.execute(query)
+        conn.commit()
     conn.close()
 
 
@@ -71,7 +76,7 @@ def countPlayers(tourn_id=1):
     conn = connect()
     c = conn.cursor()
     if tourn_id != 1:
-        c.execute("SELECT count(player_id) FROM players WHERE tournament_id = 2;")
+        c.execute("SELECT count(player_id) FROM players WHERE tournament_id = %s;" % tourn_id)
     else:
         c.execute("SELECT count(player_id) FROM players WHERE tournament_id = 1;")
     count_result = c.fetchone()
@@ -107,7 +112,7 @@ def playerStandings(tourn_id=1):
 
     conn = connect()
     c = conn.cursor()
-    # If tournament 2 chosen, choose tournament 2 player standings view.
+    # If tournament id varies from 1, fetch standings for tournament id.
     if tourn_id != 1:
         c.execute("SELECT * FROM player_standings_%s;" % tourn_id)
     else:
@@ -157,9 +162,9 @@ def swissPairings(tourn_id=1):
     """
     conn = connect()
     c = conn.cursor()
-    if tourn_id == 2:
-        # Use the swiss pairings view for tournament 2 within tournament.sql
-        c.execute("SELECT * FROM v_swiss_pairings_2;")
+    if tourn_id != 1:
+        # Use the swiss pairings view for tournament tourn_id
+        c.execute("SELECT * FROM v_swiss_pairings_%s;" % tourn_id) 
     else:
         # Use the view v_swiss_pairings as defined within tournament.sql
         c.execute("SELECT * FROM v_swiss_pairings;")
@@ -167,3 +172,5 @@ def swissPairings(tourn_id=1):
     return result
     conn.commit()
     conn.close()
+
+createTournament(13, 'superdawgs')
