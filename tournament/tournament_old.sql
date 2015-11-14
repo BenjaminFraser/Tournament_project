@@ -13,39 +13,27 @@ CREATE TABLE Tournament (
 INSERT INTO Tournament (id, name) VALUES (1, 'First tournament');
 
 -- TOURNAMENT 1 TABLES AND VIEWS
--- Create a players table with id (primary key) and name.
-CREATE TABLE Player (
+-- Create a players table with id (primary key) and name for tournament 1.
+CREATE TABLE players (
         player_id serial PRIMARY KEY,
-	name varchar(40));
-
--- Create a tournament table matching player_id's to their tournaments.
-CREATE TABLE Tournament_player (
-        player_id integer REFERENCES Player (player_id),
+	name varchar(40),
         tournament_id integer REFERENCES Tournament (id),
-        PRIMARY KEY (player_id, tournament_id));
+        UNIQUE (player_id, tournament_id));
 
--- Create a games table with 3 foreign keys linking to 
--- Player table player id and Tournament table id.
--- Primary key for win_ref, loose_ref and tournament id to prevent
--- rematches within a given tournament.
-CREATE TABLE Game (
+-- Create a games table with 2 foreign keys linking to players table player id.
+CREATE TABLE games (
         id serial PRIMARY KEY,
-	win_ref integer REFERENCES Player (player_id),
-	loose_ref integer REFERENCES Player (player_id),
+	win_ref integer REFERENCES players (player_id),
+	loose_ref integer REFERENCES players (player_id),
         tournament_id integer REFERENCES Tournament (id));
-        --UNIQUE (win_ref, loose_ref, tournament_id));
-
 
 -- Create a view to list players in tournament 1 only, with name and id.
 CREATE VIEW players_tourn_1 as
-        select Player.player_id, Player.name 
-        from Player join Tournament_player 
-        on Player.player_id = Tournament_player.player_id 
-        AND Tournament_player.tournament_id = 1; 
+        select player_id, name from players WHERE tournament_id = 1; 
 
 -- Create a view to list matches in tournament 1 only.
 CREATE VIEW games_tourn_1 as
-        select id, win_ref, loose_ref from Game where tournament_id = 1;
+        select id, win_ref, loose_ref from games WHERE tournament_id = 1;
 
 -- Create a view that lists a player_id along with associated loss record.
 CREATE VIEW v_lost_games as
@@ -92,3 +80,4 @@ CREATE VIEW v_swiss_pairings as
         b.player_id as "player_2_id", b.name as "player_2_name"
         from ranked_standings a, ranked_standings b 
         where a.rank+1 = b.rank and a.rank % 2 = 1;
+

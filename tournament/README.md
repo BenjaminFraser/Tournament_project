@@ -5,7 +5,7 @@
 
 ## INTRODUCTION ##
 
-The swiss tournament database is a database system generated through a an SQL file, which works in conjunction with a Python function file and a Python test file. The database allows the registering of players for a swiss style game tournament, followed by recording matches between players, including wins and losses. The players will also be sorted into order of rankings, based on total wins. 
+The swiss tournament database is a database system generated through a an SQL file, which works in conjunction with a Python function file and a Python test file. The database allows the registering of players for a swiss style game tournament, followed by recording matches between players, including wins and losses. The players will also be sorted into order of rankings, based on total wins. The database has the capability for multiple tournaments
 
 ----------
 
@@ -17,16 +17,19 @@ This project provides you with the following required directory and files:
 ```
 	vagrant/
 	├── Vagrantfile
+	├── pg_config.sh
 	├── Tournament/
 		├── tournament_test.py
 		├── tournament.py
 		├── tournament.sql
+		├── multi_tourn_views.py
 		├── sample_data.py
 ```
 - `Vagrantfile` contains the virtual machine configuration data to enable use of the database in PostgreSQL.
 - `tournament.sql` is the setup file for the database schema.
 - `tournament.py` contains a library of functions defined in Python for use with the database.
 - `tournament_test.py` takes the functions defined within tournament.py, and tests the correct functionality of each functions purpose. 
+- `multi_tourn_views.py` provides the generated tournament views required for when a new tournament is added to the database.
 
 You will need Git installed on your system to get the Virtual Machine running prior to using the database. You can download the required version of Git for your operating system using this [link](http://git-scm.com/downloads).
 

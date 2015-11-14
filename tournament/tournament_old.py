@@ -31,7 +31,6 @@ def createTournament(tourn_id, name):
     query = "INSERT INTO Tournament (id, name) VALUES (%s, %s);"
     c.execute(query, (tourn_id, name))
     conn.commit()
-    conn.close()
     # Store view functions from multi_tourn_views.py within a list.
     function_list = [
         initTournPlayersView, 
@@ -49,15 +48,14 @@ def createTournament(tourn_id, name):
         c.execute(query)
         conn.commit()
     conn.close()
-    return tourn_id
 
 
 def deleteMatches():
     """Remove all the match records from the database."""
     conn = connect()
     c = conn.cursor()
-    # Truncate tournaments Game tables only, preserving player records.
-    c.execute("TRUNCATE TABLE Game;")
+    # Truncate both tournaments games tables only, preserving player records.
+    c.execute("TRUNCATE TABLE games;")
     conn.commit()
     conn.close()
 
@@ -66,21 +64,21 @@ def deletePlayers():
     """Remove all the player records from the database."""
     conn = connect()
     c = conn.cursor()
-    # Truncate the Player, Tournament_player and Game tables within the database.
-    c.execute("TRUNCATE TABLE Player, Game, Tournament_player;")
+    # Truncate both tournaments players and games tables from the database.
+    c.execute("TRUNCATE TABLE players, games")
     conn.commit()
     conn.close()
 
 
-def countPlayers(tourn_id=0):
-    """Returns the number of players currently registered.
-       When tourn_id=0 (default) returns number of total players registered.
-       When tourn_id=x (where x is any tourn id number) returns total 
-       players participating within tournament id x. 
-    """
+def countPlayers(tourn_id=1):
+    """Returns the number of players currently registered."""
+
     conn = connect()
     c = conn.cursor()
-    c.execute("SELECT count(player_id) FROM Player;")
+    if tourn_id != 1:
+        c.execute("SELECT count(player_id) FROM players WHERE tournament_id = %s;" % tourn_id)
+    else:
+        c.execute("SELECT count(player_id) FROM players WHERE tournament_id = 1;")
     count_result = c.fetchone()
     return count_result[0]
     conn.commit()
@@ -88,37 +86,15 @@ def countPlayers(tourn_id=0):
 
 
 def registerPlayer(name, tourn_id=1):
-    """Registers a player and unique id into the players table.
-       By default, if no tourn_id is specified for the input
-       player, the player will be registered to tournament id 1.
+    """Registers a player and unique id into the players table."""
 
-    Args:
-      name: The players full name (no need to be unique)
-      tourn_id: The tournament ID the player is to join (default 1)
-    """
     conn = connect()
     c = conn.cursor()
-    # return the default supplied player_id created using RETURNING clause.
-    query = "INSERT INTO Player (name) VALUES (%s) RETURNING player_id;"
-    c.execute(query, (name,))
-    player_id = c.fetchone()[0]  
-    conn.commit()
-    tournamentPlayer(player_id, tourn_id)
-    conn.close()
-
-
-def tournamentPlayer(player_id, tourn_id):
-    """Adds an alread registered player to a different tournament 
-       by matching the associated player_id to a tournament_id.
-
-    Args:
-      player_id: The players associated player_id
-      tourn_id: The tournaments associated tournament_id
-    """
-    conn = connect()
-    c = conn.cursor()
-    query = "INSERT INTO Tournament_player (player_id, tournament_id) VALUES (%s, %s);"
-    c.execute(query, (player_id, tourn_id))
+    if tourn_id != 1:
+        query = "INSERT INTO players (name, tournament_id) VALUES (%s, %s);"
+    else:
+        query = "INSERT INTO players (name, tournament_id) VALUES (%s, %s);"
+    c.execute(query, (name, tourn_id))
     conn.commit()
     conn.close()
 
@@ -133,6 +109,7 @@ def playerStandings(tourn_id=1):
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+
     conn = connect()
     c = conn.cursor()
     # If tournament id varies from 1, fetch standings for tournament id.
@@ -154,14 +131,15 @@ def reportMatch(winner, loser, tourn_id=1):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
+
     conn = connect()
     c = conn.cursor()
     # If tournament 2 chosen, select appropriate query. 
     if tourn_id != 1:
         # Query and execute code format to escape strings, avoiding SQL inj.
-        query = "INSERT INTO Game (win_ref, loose_ref, tournament_id) VALUES (%s, %s, %s);"
+        query = "INSERT INTO games (win_ref, loose_ref, tournament_id) VALUES (%s, %s, %s);"
     else:
-        query = "INSERT INTO Game (win_ref, loose_ref, tournament_id) VALUES (%s, %s, %s);"
+        query = "INSERT INTO games (win_ref, loose_ref, tournament_id) VALUES (%s, %s, %s);"
     c.execute(query, (winner, loser, tourn_id))
     conn.commit()
     conn.close()
@@ -194,3 +172,5 @@ def swissPairings(tourn_id=1):
     return result
     conn.commit()
     conn.close()
+
+createTournament(13, 'superdawgs')
