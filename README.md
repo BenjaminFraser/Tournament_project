@@ -1,16 +1,18 @@
-# **SWISS TOURNAMENT DATABASE - README** #
+# **SWISS TOURNAMENT DATABASE - README** 
 
 ----------
 
 
-## INTRODUCTION ##
+## INTRODUCTION 
 
-The swiss tournament database is a database system generated through a an SQL file, which works in conjunction with a Python function file and a Python test file. The database allows the registering of players for a swiss style game tournament, followed by recording matches between players, including wins and losses. The players will also be sorted into order of rankings, based on total wins. The database has the capability for multiple tournaments
+The swiss tournament database is a database system generated through a an SQL file, which works in conjunction with a Python function file and a Python test file. 
+
+The database allows the registering of players for a swiss style game tournament, followed by recording matches between players, including wins and losses. The players will also be sorted into order of rankings, based on total wins. The database has the capability for multiple tournaments
 
 ----------
 
 
-## REQUIREMENTS ##
+## REQUIREMENTS 
 
 This project provides you with the following required directory and files:
 
@@ -30,6 +32,7 @@ This project provides you with the following required directory and files:
 - `tournament.py` contains a library of functions defined in Python for use with the database.
 - `tournament_test.py` takes the functions defined within tournament.py, and tests the correct functionality of each functions purpose. 
 - `multi_tourn_views.py` provides the generated tournament views required for when a new tournament is added to the database.
+- `sample_data.py` provides sample input data for quick testing requirements and functionality of the database.
 
 You will need Git installed on your system to get the Virtual Machine running prior to using the database. You can download the required version of Git for your operating system using this [link](http://git-scm.com/downloads).
 
@@ -42,7 +45,26 @@ Finally, you shall need Vagrant installed to allow configuration of the virtual 
 ---------
 
 
-## QUICK START ##
+## TABLE SCHEMA 
+
+### Tables 
+
+- **Tournament** - Stores the tournament id and the tournament name for each tournament created.
+
+- **Player** - Stores the player id and the name of each registered player inserted into the database.
+
+- **Game** - Stores the unique game id, winner reference and looser reference for each game played. The winner and looser references are foreign keys of the Player table player_id.
+
+- **Tournament_player** - Stores the player_id and the tournament_id associated with the tournament that player is participating within. Players may take part in multiple tournaments at the same time.
+
+### Views 
+
+- There are a total of 8 created views for the database, which provide the functions required for player standings, rankings and swiss pairings. On creation of a new tournament, extra views associated for that tournament are generated using Python and SQL.
+
+---------
+
+
+## QUICK START 
 
 In order to get the tournament database up and running, follow the series of steps given below:
 
@@ -64,8 +86,11 @@ in the Virtual machine command line.
 
 --------
 
-## CREATOR ##
+
+## CREATOR 
 
 Benjamin Fraser
+
+Credit to Udacity for the core unit tests (1-8) of the tournament database. 
 
 --------
