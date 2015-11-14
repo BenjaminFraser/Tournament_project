@@ -123,7 +123,53 @@ def testPairings():
         raise ValueError(
             "After one match, players with one win should be paired.")
     print "8. After one match, players with one win are paired."
-    
+
+
+def testMultipleTournaments():
+    # Create a new tournament with id 2 and register players.
+    deleteTournament(tourn_id=2)
+    createTournament(2, 'New tournament')
+    the_players = ['A', 'B', 'C', 'D', 'E', 'F']
+    for player in the_players:
+        registerPlayer(player, tourn_id=2)
+    standings = playerStandings(tourn_id=2)
+    [idA, idB, idC, idD, idE, idF] = [row[0] for row in standings]
+    correct_standing = [(idA, 0),   # Rank 1
+                        (idB, 0),   # Rank 1
+                        (idC, 0),   # Rank 1
+                        (idD, 0),   # Rank 1
+                        (idE, 0),   # Rank 1
+                        (idF, 0)]   # Rank 1
+    actual_standing = [(row[0], row[2]) for row in standings]
+    if correct_standing != actual_standing:
+        raise ValueError(
+            "The standings before match are incorrect")
+    print "9. Multiple tournaments support deletion, creation and initial standings."
+
+
+def multiTournamentPairings():
+    deleteMatches()
+    deletePlayers()
+    deleteTournament(tourn_id=2)
+    createTournament(2, 'New tournament')
+    the_players = ['A', 'B', 'C', 'D']
+    for player in the_players:
+        registerPlayer(player, tourn_id=2)
+    standings = playerStandings(tourn_id=2)
+    [id1, id2, id3, id4] = [row[0] for row in standings]
+    reportMatch(id1, id2, tourn_id=2)
+    reportMatch(id3, id4, tourn_id=2)
+    pairings = swissPairings(tourn_id=2)
+    if len(pairings) != 2:
+        raise ValueError(
+            "For four players, swissPairings should return two pairs.")
+    [(pid1, pname1, pid2, pname2), (pid3, pname3, pid4, pname4)] = pairings
+    correct_pairs = set([frozenset([id1, id3]), frozenset([id2, id4])])
+    actual_pairs = set([frozenset([pid1, pid2]), frozenset([pid3, pid4])])
+    if correct_pairs != actual_pairs:
+        raise ValueError(
+            "After one match, players with one win should be paired.")
+    print "10. After one match, multiple tournament standings are correct."
 
 if __name__ == '__main__':
     import time
@@ -136,6 +182,8 @@ if __name__ == '__main__':
     testStandingsBeforeMatches()
     testReportMatches()
     testPairings()
+    testMultipleTournaments()
+    multiTournamentPairings()
     endtime = time.time()
     print "Success!  All tests pass! Time taken was ", endtime - start
 

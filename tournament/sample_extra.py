@@ -4,6 +4,7 @@ from tournament import connect
 from tournament import reportMatch
 from tournament import createTournament
 from tournament import tournamentPlayer
+from tournament import deleteTournament
 
 from tournament_test import testDelete
 
@@ -74,14 +75,25 @@ def setup_players_and_matches():
     testDelete()
     for player in player_list:
         registerPlayerSample(player[0], player[1], tourn_id=1)
+        tournamentPlayer(player[0], 5)
 
     createRandomMatches(player_list, 100, tourn_id=1)
+    createRandomMatches(player_list, 100, tourn_id=5)
 
     for player in player_list_02:
         registerPlayerSample(player[0], player[1], tourn_id=13)
+        tournamentPlayer(player[0], 6)
 
     createRandomMatches(player_list_02, 100, tourn_id=13)
+    createRandomMatches(player_list_02, 100, tourn_id=6)
 
 
 if __name__ == '__main__':
+    tournies = [5, 6, 13]
+    for f in tournies:
+        deleteTournament(tourn_id=f)
+        print "Tournament %s deleted." % str(f)
+    createTournament(5, 'Loopylooloo')
+    createTournament(6, 'Geek Masterz')
+    createTournament(13, 'We are the Pythons')
     setup_players_and_matches()

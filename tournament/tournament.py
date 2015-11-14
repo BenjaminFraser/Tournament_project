@@ -2,7 +2,7 @@
 # 
 # tournament.py -- implementation of a Swiss-system tournament
 #
-from multi_tourn_views import *
+from multi_extra_views import *
 import psycopg2
 
 
@@ -31,7 +31,6 @@ def createTournament(tourn_id, name):
     query = "INSERT INTO Tournament (id, name) VALUES (%s, %s);"
     c.execute(query, (tourn_id, name))
     conn.commit()
-    conn.close()
     # Store view functions from multi_tourn_views.py within a list.
     function_list = [
         initTournPlayersView, 
@@ -50,6 +49,47 @@ def createTournament(tourn_id, name):
         conn.commit()
     conn.close()
     return tourn_id
+
+
+def removeTournamentPlayers(tourn_id):
+    """Remove all the players from the selected tournament."""
+    conn = connect()
+    c = conn.cursor()
+    # Delete the tournament registrations from Tournament_player table.
+    c.execute("DELETE FROM Tournament_player "
+        "WHERE tournament_id = %s;" % (tourn_id,))
+    conn.commit()
+    conn.close()
+
+
+def deleteTournament(tourn_id):
+    """Remove all the speified tournament data from the database."""
+    try:
+        removeTournamentPlayers(tourn_id)
+    except:
+        pass
+    conn = connect()
+    c = conn.cursor()
+    # Delete the tournament data from Game table.
+    c.execute("DELETE FROM Game "
+        "WHERE tournament_id = %s;" % (tourn_id,))
+    conn.commit()
+    # Delete the tournament from the Tournament table.
+    c.execute("DELETE FROM Tournament "
+        "WHERE id = %s;" % (tourn_id,))
+    conn.commit()
+    # Drop all created views for the specified tournament.
+    view_prefix = ['players_tourn_', 'games_tourn_', 'lost_games_', 'won_games_',
+        'combined_standings_', 'player_standings_', 'ranked_standings_', 'swiss_pairings_']
+    tourn_views = [f + str(tourn_id) for f in view_prefix]
+    # If the view exists, drop it, if not, pass and move on.
+    for f in reversed(tourn_views): 
+        try:
+            c.execute("DROP VIEW %s;" % f)
+            conn.commit()
+        except:
+            pass
+    conn.close()
 
 
 def deleteMatches():
@@ -104,6 +144,7 @@ def registerPlayer(name, tourn_id=1):
     player_id = c.fetchone()[0]  
     conn.commit()
     tournamentPlayer(player_id, tourn_id)
+    conn.commit()
     conn.close()
 
 
@@ -135,12 +176,8 @@ def playerStandings(tourn_id=1):
     """
     conn = connect()
     c = conn.cursor()
-    # If tournament id varies from 1, fetch standings for tournament id.
-    if tourn_id != 1:
-        c.execute("SELECT * FROM player_standings_%s;" % tourn_id)
-    else:
-        # Use the view player_standings as defined within tournament.sql
-        c.execute("SELECT * FROM player_standings;")
+    # Fetch standings for the selected tournament from the standings view.
+    c.execute("SELECT * FROM player_standings_%s;" % tourn_id)
     performance_table = c.fetchall()
     return performance_table
     conn.commit()
@@ -156,12 +193,8 @@ def reportMatch(winner, loser, tourn_id=1):
     """
     conn = connect()
     c = conn.cursor()
-    # If tournament 2 chosen, select appropriate query. 
-    if tourn_id != 1:
-        # Query and execute code format to escape strings, avoiding SQL inj.
-        query = "INSERT INTO Game (win_ref, loose_ref, tournament_id) VALUES (%s, %s, %s);"
-    else:
-        query = "INSERT INTO Game (win_ref, loose_ref, tournament_id) VALUES (%s, %s, %s);"
+    # Insert the match results into the Game table under the approriate tourn id. 
+    query = "INSERT INTO Game (win_ref, loose_ref, tournament_id) VALUES (%s, %s, %s);"
     c.execute(query, (winner, loser, tourn_id))
     conn.commit()
     conn.close()
@@ -184,12 +217,8 @@ def swissPairings(tourn_id=1):
     """
     conn = connect()
     c = conn.cursor()
-    if tourn_id != 1:
-        # Use the swiss pairings view for tournament tourn_id
-        c.execute("SELECT * FROM v_swiss_pairings_%s;" % tourn_id) 
-    else:
-        # Use the view v_swiss_pairings as defined within tournament.sql
-        c.execute("SELECT * FROM v_swiss_pairings;")
+    # Use the generated swiss_pairings view for the selected tournament.
+    c.execute("SELECT * FROM swiss_pairings_%s;" % tourn_id) 
     result = c.fetchall()
     return result
     conn.commit()
