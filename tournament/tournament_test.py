@@ -132,6 +132,10 @@ def testMultipleTournaments():
     the_players = ['A', 'B', 'C', 'D', 'E', 'F']
     for player in the_players:
         registerPlayer(player, tourn_id=2)
+    tourn_count = countPlayers(tourn_id=2)
+    if tourn_count != 6:
+        raise ValueError(
+            "After registering, tournament 2 count should return ten.")
     standings = playerStandings(tourn_id=2)
     [idA, idB, idC, idD, idE, idF] = [row[0] for row in standings]
     correct_standing = [(idA, 0),   # Rank 1

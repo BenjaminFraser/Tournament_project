@@ -5,14 +5,17 @@
 def initTournPlayersView(t_id):
 	""" Returns SQL query string applicable to tourn players view """
 	tourn_players = ('CREATE VIEW players_tourn_%s as '
-    'select player_id, name from players WHERE tournament_id = %s;' % (2*(t_id,)))
+        'select Player.player_id, Player.name '
+        'from Player join Tournament_player '
+        'on Player.player_id = Tournament_player.player_id '
+        'AND Tournament_player.tournament_id = %s;' % (2*(t_id,)))
 	return tourn_players
 
 
 def initTournGamesView(t_id):
     """ Returns SQL query string applicable to tourn games view """
     tourn_games = ('CREATE VIEW games_tourn_%s as '
-    'select id, win_ref, loose_ref from games WHERE tournament_id = %s;' % (2*(t_id,)))
+    'select id, win_ref, loose_ref from Game where tournament_id = %s;' % (2*(t_id,)))
     return tourn_games
 
 

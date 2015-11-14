@@ -2,7 +2,9 @@
 # 
 # tournament.py -- implementation of a Swiss-system tournament
 #
-from multi_extra_views import *
+
+# Fetch multi tournament view functions for createTournament().
+from multi_tourn_views import *
 import psycopg2
 
 
@@ -41,14 +43,12 @@ def createTournament(tourn_id, name):
         initTournPlayerStandings, 
         initTournRankedStandings, 
         initTournSwissPairings]
-
     # Iterate through function_list and execute each tourn view.
     for f in function_list:
         query = f(tourn_id)
         c.execute(query)
         conn.commit()
     conn.close()
-    return tourn_id
 
 
 def removeTournamentPlayers(tourn_id):
@@ -64,9 +64,10 @@ def removeTournamentPlayers(tourn_id):
 
 def deleteTournament(tourn_id):
     """Remove all the speified tournament data from the database."""
-    try:
-        removeTournamentPlayers(tourn_id)
-    except:
+    # If not already cleared, remove tournament players from the tournament. 
+    try: 
+        removeTournamentPlayers(tourn_id) 
+    except: 
         pass
     conn = connect()
     c = conn.cursor()
@@ -74,7 +75,7 @@ def deleteTournament(tourn_id):
     c.execute("DELETE FROM Game "
         "WHERE tournament_id = %s;" % (tourn_id,))
     conn.commit()
-    # Delete the tournament from the Tournament table.
+    # Delete the Tournament table data.
     c.execute("DELETE FROM Tournament "
         "WHERE id = %s;" % (tourn_id,))
     conn.commit()
@@ -82,7 +83,7 @@ def deleteTournament(tourn_id):
     view_prefix = ['players_tourn_', 'games_tourn_', 'lost_games_', 'won_games_',
         'combined_standings_', 'player_standings_', 'ranked_standings_', 'swiss_pairings_']
     tourn_views = [f + str(tourn_id) for f in view_prefix]
-    # If the view exists, drop it, if not, pass and move on.
+    # If the view exists, drop it, if not, move on.
     for f in reversed(tourn_views): 
         try:
             c.execute("DROP VIEW %s;" % f)
@@ -114,17 +115,24 @@ def deletePlayers():
 
 def countPlayers(tourn_id=0):
     """Returns the number of players currently registered.
+
        When tourn_id=0 (default) returns number of total players registered.
        When tourn_id=x (where x is any tourn id number) returns total 
        players participating within tournament id x. 
     """
     conn = connect()
     c = conn.cursor()
-    c.execute("SELECT count(player_id) FROM Player;")
+    # If tourn_id is 0 (default) count all registered players.
+    if tourn_id == 0:
+        c.execute("SELECT count(player_id) FROM Player;")
+    else:
+        # Count the total players within the selected tournament.
+        c.execute("SELECT count(player_id) FROM Tournament_player \
+                  WHERE tournament_id = %s;" % (tourn_id,))
     count_result = c.fetchone()
-    return count_result[0]
     conn.commit()
     conn.close()
+    return count_result[0]
 
 
 def registerPlayer(name, tourn_id=1):
@@ -143,13 +151,14 @@ def registerPlayer(name, tourn_id=1):
     c.execute(query, (name,))
     player_id = c.fetchone()[0]  
     conn.commit()
+    # Using the retrieved playing_id, insert into the Tournament_player table.
     tournamentPlayer(player_id, tourn_id)
     conn.commit()
     conn.close()
 
 
 def tournamentPlayer(player_id, tourn_id):
-    """Adds an alread registered player to a different tournament 
+    """Adds an existing registered player to a different tournament 
        by matching the associated player_id to a tournament_id.
 
     Args:
@@ -179,9 +188,9 @@ def playerStandings(tourn_id=1):
     # Fetch standings for the selected tournament from the standings view.
     c.execute("SELECT * FROM player_standings_%s;" % tourn_id)
     performance_table = c.fetchall()
-    return performance_table
     conn.commit()
     conn.close()
+    return performance_table
 
 
 def reportMatch(winner, loser, tourn_id=1):
@@ -220,6 +229,6 @@ def swissPairings(tourn_id=1):
     # Use the generated swiss_pairings view for the selected tournament.
     c.execute("SELECT * FROM swiss_pairings_%s;" % tourn_id) 
     result = c.fetchall()
-    return result
     conn.commit()
     conn.close()
+    return result

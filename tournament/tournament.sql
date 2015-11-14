@@ -5,7 +5,7 @@ DROP DATABASE IF EXISTS tournament;
 CREATE DATABASE tournament;
 \c tournament;
 
-
+-- Create a Tournament table for each available tournament.
 CREATE TABLE Tournament (
         id serial PRIMARY KEY, 
         name varchar(150) NOT NULL);
@@ -15,7 +15,6 @@ CREATE TABLE Tournament (
 INSERT INTO Tournament (id, name) VALUES (1, 'First tournament');
 
 
--- TOURNAMENT 1 TABLES AND VIEWS
 -- Create a players table with id (primary key) and name.
 CREATE TABLE Player (
         player_id serial PRIMARY KEY,
@@ -75,7 +74,7 @@ CREATE VIEW combined_standings_1 as
         from won_games_1 as table1
         join lost_games_1 as table2 on table1.player_id = table2.player_id 
         order by wins desc;
-        
+
 
 -- Create a view that combines the id, name and won games from combined standings, with 
 -- a new column called total_games, which is derived from wins + lost games.
