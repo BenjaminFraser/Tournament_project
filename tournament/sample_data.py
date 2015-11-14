@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# 
+# sample_data.py -- sample database data for a Swiss-system tournament.
+# imports two sets of ten players into two tournaments each, four total.
+#
+
 import random
 
 from tournament import connect
@@ -76,14 +82,11 @@ def setup_players_and_matches():
     for player in player_list:
         registerPlayerSample(player[0], player[1], tourn_id=1)
         tournamentPlayer(player[0], 5)
-
-    createRandomMatches(player_list, 100, tourn_id=1)
-    createRandomMatches(player_list, 100, tourn_id=5)
-
     for player in player_list_02:
         registerPlayerSample(player[0], player[1], tourn_id=13)
         tournamentPlayer(player[0], 6)
-
+    createRandomMatches(player_list, 100, tourn_id=1)
+    createRandomMatches(player_list, 100, tourn_id=5)
     createRandomMatches(player_list_02, 100, tourn_id=13)
     createRandomMatches(player_list_02, 100, tourn_id=6)
 

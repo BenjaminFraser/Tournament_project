@@ -203,7 +203,8 @@ def reportMatch(winner, loser, tourn_id=1):
     conn = connect()
     c = conn.cursor()
     # Insert the match results into the Game table under the approriate tourn id. 
-    query = "INSERT INTO Game (win_ref, loose_ref, tournament_id) VALUES (%s, %s, %s);"
+    query = "INSERT INTO Game (win_ref, loose_ref, tournament_id) \
+            VALUES (%s, %s, %s);"
     c.execute(query, (winner, loser, tourn_id))
     conn.commit()
     conn.close()
