@@ -18,7 +18,7 @@ INSERT INTO Tournament (id, name) VALUES (1, 'First tournament');
 -- Create a players table with id (primary key) and name.
 CREATE TABLE Player (
         player_id serial PRIMARY KEY,
-	name varchar(40));
+	name varchar(40) NOT NULL);
 
 
 -- Create a tournament table matching player_id's to their tournaments.
@@ -30,11 +30,13 @@ CREATE TABLE Tournament_player (
 
 -- Create a Game table with 3 foreign keys linking to 
 -- Player table player id and Tournament table id.
+-- Use CHECK (win_ref <> loose_ref) to ensure winner is different to looser.
 CREATE TABLE Game (
         id serial PRIMARY KEY,
-	win_ref integer REFERENCES Player (player_id),
-	loose_ref integer REFERENCES Player (player_id),
-        tournament_id integer REFERENCES Tournament (id));
+	win_ref integer REFERENCES Player (player_id) ON DELETE CASCADE,
+	loose_ref integer REFERENCES Player (player_id) ON DELETE CASCADE,
+        tournament_id integer REFERENCES Tournament (id)
+        CHECK (win_ref <> loose_ref));
 
 
 -- Create a view to list players in tournament 1 only, with name and id.

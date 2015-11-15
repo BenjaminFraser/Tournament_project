@@ -47,8 +47,7 @@ def registerPlayerSample(player_id, name, tourn_id=1):
     Args:
       name: the player's full name (need not be unique).
     """
-    db = connect()
-    db_cursor = db.cursor()
+    db, db_cursor = connect()
     query = "INSERT INTO Player (player_id, name) VALUES (%s, %s)"
     db_cursor.execute(query, (player_id, name))
     db.commit()

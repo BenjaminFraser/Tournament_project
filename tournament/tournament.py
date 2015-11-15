@@ -8,9 +8,18 @@ from multi_tourn_views import *
 import psycopg2
 
 
-def connect():
-    """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
+def connect(database_name="tournament"):
+    """Connect to the PostgreSQL database.  Returns a database connection.
+       Connect method deals with the database connection and cursor simultaneously
+       assigning and returning two variables - conn and c from the function.
+       Also set up a try: except: block to encounter any exceptions on connect.
+    """
+    try:
+        conn = psycopg2.connect("dbname={}".format(database_name))
+        c = conn.cursor()
+        return conn, c 
+    except:
+        print "There was a problem connecting to the database."
 
 
 def createTournament(tourn_id, name):
@@ -27,8 +36,7 @@ def createTournament(tourn_id, name):
         swiss_pairings_x: pairings for next match in tournament x
     """
     name = str(name)
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     # Insert the new tournament into table Tournament.
     query = "INSERT INTO Tournament (id, name) VALUES (%s, %s);"
     c.execute(query, (tourn_id, name))
@@ -53,8 +61,7 @@ def createTournament(tourn_id, name):
 
 def removeTournamentPlayers(tourn_id):
     """Remove all the players from the selected tournament."""
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     # Delete the tournament registrations from Tournament_player table.
     c.execute("DELETE FROM Tournament_player "
         "WHERE tournament_id = %s;" % (tourn_id,))
@@ -69,8 +76,7 @@ def deleteTournament(tourn_id):
         removeTournamentPlayers(tourn_id) 
     except: 
         pass
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     # Delete the tournament data from Game table.
     c.execute("DELETE FROM Game "
         "WHERE tournament_id = %s;" % (tourn_id,))
@@ -95,8 +101,7 @@ def deleteTournament(tourn_id):
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     # Truncate tournaments Game tables only, preserving player records.
     c.execute("TRUNCATE TABLE Game;")
     conn.commit()
@@ -105,8 +110,7 @@ def deleteMatches():
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     # Truncate the Player, Tournament_player and Game tables within the database.
     c.execute("TRUNCATE TABLE Player, Game, Tournament_player;")
     conn.commit()
@@ -120,8 +124,7 @@ def countPlayers(tourn_id=0):
        When tourn_id=x (where x is any tourn id number) returns total 
        players participating within tournament id x. 
     """
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     # If tourn_id is 0 (default) count all registered players.
     if tourn_id == 0:
         c.execute("SELECT count(player_id) FROM Player;")
@@ -144,8 +147,7 @@ def registerPlayer(name, tourn_id=1):
       name: The players full name (no need to be unique)
       tourn_id: The tournament ID the player is to join (default 1)
     """
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     # return the default supplied player_id created using RETURNING clause.
     query = "INSERT INTO Player (name) VALUES (%s) RETURNING player_id;"
     c.execute(query, (name,))
@@ -165,8 +167,7 @@ def tournamentPlayer(player_id, tourn_id):
       player_id: The players associated player_id
       tourn_id: The tournaments associated tournament_id
     """
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     query = "INSERT INTO Tournament_player (player_id, tournament_id) VALUES (%s, %s);"
     c.execute(query, (player_id, tourn_id))
     conn.commit()
@@ -183,8 +184,7 @@ def playerStandings(tourn_id=1):
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     # Fetch standings for the selected tournament from the standings view.
     c.execute("SELECT * FROM player_standings_%s;" % tourn_id)
     performance_table = c.fetchall()
@@ -200,8 +200,7 @@ def reportMatch(winner, loser, tourn_id=1):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     # Insert the match results into the Game table under the approriate tourn id. 
     query = "INSERT INTO Game (win_ref, loose_ref, tournament_id) \
             VALUES (%s, %s, %s);"
@@ -225,8 +224,7 @@ def swissPairings(tourn_id=1):
         id2: the second player's unique id
         name2: the second player's name
     """
-    conn = connect()
-    c = conn.cursor()
+    conn, c = connect()
     # Use the generated swiss_pairings view for the selected tournament.
     c.execute("SELECT * FROM swiss_pairings_%s;" % tourn_id) 
     result = c.fetchall()
