@@ -17,7 +17,7 @@ The database allows the registering of players for a swiss style game tournament
 This project provides you with the following required directory and files:
 
 ```
-	vagrant/
+	Tournament_project/
 	├── Vagrantfile
 	├── pg_config.sh
 	├── Tournament/
